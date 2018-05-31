@@ -5,7 +5,7 @@ export const Shipment = [
 
             sensorId: [
                 {
-                    id: "termo-sensor1",
+                    id: "sensor1",
                     value: null,
                     time: null,
                     ассоunt: "dhgkjhsgfkjh"

@@ -4,7 +4,7 @@ import { Middleware, NestMiddleware, ExpressMiddleware, Injectable } from '@nest
 export class LoggerMiddleware implements NestMiddleware {
   resolve(...args: any[]): ExpressMiddleware {
     return (req, res, next) => { 
-        console.log('object :!!!!');
+        console.log('request :!!!!');
       next();
     };
   }

@@ -12,7 +12,7 @@ export class MosaicHelper {
     namespaceHttp: NamespaceHttp;
     privateKey = config.TOCKEN_DISTRIBUTOR_PRIVATE_KEY as string;
     account = Account.createFromPrivateKey(this.privateKey, NetworkType.MIJIN_TEST);
-    transactionHttp: TransactionHttp; 
+    transactionHttp: TransactionHttp;
 
     constructor(private namespace: string, private mosaic: string, private duration: number) {
         this.transactionHttp = new TransactionHttp(config.URL);

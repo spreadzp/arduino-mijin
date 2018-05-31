@@ -1,10 +1,15 @@
+import { TransactionHelper } from './../../blockchain/transactionHelper';
 import { Log } from './../models/log';
 import { DeviceData } from './../models/device.data';
 import { Shipment } from '../models/shipment';
+const fileSaver = require('fs');
 
 export class Conveyor {
-    private fs = require('fs');
-    constructor() { }
+    fs = fileSaver;
+    transactionHelper: TransactionHelper;
+    constructor() {
+        this.transactionHelper = new TransactionHelper();
+    }
     async defineShipment(deviceData: DeviceData) {
 
         //let shipment = Shipment.filter(a => deviceData.shipmentId === a.shipmentId.id);
@@ -15,41 +20,36 @@ export class Conveyor {
         const data = shipment.shipmentId.sensorId[0].ассоunt;
         await this.writeToMultisigAccount(data);
         const oldData = await this.readLog();
-        console.log('oldData :', oldData);
+        //console.log('oldData :', oldData);
         await this.writeLog(`export const Log = ${JSON.stringify(shipment)}`);
     }
 
-    writeDeviceData(shipment: any){
-        
-       // Log.push(shipment); 
-        console.log('Log :' );
+    writeDeviceData(shipment: any) {
+        // Log.push(shipment); 
+        console.log('Log :');
     }
 
     async readLog() {
-        this.fs.readFile('/home/dev/Arduino/arduino-mijin/src/common/models/log.ts', function (err, data) {
+        this.fs.readFile(__dirname + '/../models/log.ts', function (err, data) {
             if (err) {
                 return console.error(err);
             }
             console.log("Asynchronous read: " + data.toString());
             return data
         })
-           
+
     }
+
     async writeLog(newSensorData: any) {
-       
-      
-            this.fs.writeFile('/home/dev/Arduino/arduino-mijin/src/common/models/log.ts', newSensorData,  function(err) {
-                if (err) {
-                    return console.error(err);
-                }
-                console.log("File saved!");
-            }); 
+        this.fs.writeFile(__dirname + '/../models/log.ts', newSensorData, function (err) {
+            if (err) {
+                return console.error(err);
+            }
+            console.log("File saved!");
+        });
     }
 
     writeToMultisigAccount(account: any) {
-        console.log('account :', account);
+        this.transactionHelper.initMultisigTransaction();
     }
-
-
-
 }

@@ -1,7 +1,7 @@
 {
   "name": "arduino-mijin",
   "version": "1.0.0",
-  "description": "io-t-blockchain",
+  "description": "iot-mijin",
   "author": "spread2009@gmail.com",
   "license": "MIT",
   "scripts": {
@@ -23,6 +23,7 @@
     "@nestjs/testing": "^5.0.0-beta.6",
     "@nestjs/websockets": "^5.0.0-beta.6",
     "fastify-formbody": "^2.0.0",
+    "http-port-forward": "^2.0.3",
     "nem2-sdk": "^0.9.3",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.0.0",

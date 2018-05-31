@@ -105,9 +105,9 @@ export class TransactionHelper {
         // announce signed transaction
         const listener = new Listener(config.URL);
         this.anounce(lockFundsTransactionSigned);
-     
-    
-        
+
+
+
         listener.open().then(() => {
 
             transactionHttp.announce(lockFundsTransactionSigned).subscribe(x => console.log("announce", x),
@@ -119,42 +119,105 @@ export class TransactionHelper {
                 .flatMap(ignored => transactionHttp.announceAggregateBonded(signedTransaction))
                 .subscribe(announcedAggregateBonded => {
                     console.log("announcedAggregateBonded", announcedAggregateBonded)
-                    this.confirmDistributor(); 
+                    this.confirmDistributor();
                 },
                     err => console.error(err));
-        }); 
+        });
     }
 
-    cosignAggregateBondedTransaction(transaction: AggregateTransaction,ticketDistributorAccount: Account )  {
+    cosignAggregateBondedTransaction(transaction: AggregateTransaction, ticketDistributorAccount: Account) {
         //const ticketDistributorAccount = Account.createFromPrivateKey(config.TOCKEN_DISTRIBUTOR_PRIVATE_KEY, NetworkType.MIJIN_TEST);
         const cosignatureTransaction = CosignatureTransaction.create(transaction);
-        return  ticketDistributorAccount.signCosignatureTransaction(cosignatureTransaction); 
+        return ticketDistributorAccount.signCosignatureTransaction(cosignatureTransaction);
     }
 
     confirmDistributor() {
         const ticketDistributorAccount = Account.createFromPrivateKey(config.TOCKEN_DISTRIBUTOR_PRIVATE_KEY, NetworkType.MIJIN_TEST);
-         
+
         const accountHttp = new AccountHttp(config.URL);
-        const transactionHttp = new TransactionHttp(config.URL); 
+        const transactionHttp = new TransactionHttp(config.URL);
 
         accountHttp.aggregateBondedTransactions(ticketDistributorAccount.publicAccount)
             .flatMap((_) => _)
             .filter((_) => !_.signedByAccount(ticketDistributorAccount.publicAccount))
-            .map(transaction => { 
+            .map(transaction => {
                 //console.log('transaction :',transaction );
-                return this.cosignAggregateBondedTransaction(transaction, ticketDistributorAccount)})
+                return this.cosignAggregateBondedTransaction(transaction, ticketDistributorAccount)
+            })
             .flatMap(cosignatureSignedTransaction => {// console.log('cosignatureSignedTransaction :', cosignatureSignedTransaction);
-                return transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction)}
-            )  
+                return transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction)
+            }
+            )
             .subscribe(announcedTransaction => console.log(announcedTransaction),
                 err => console.error(err));
+    }
+
+    initMultisigTransaction() {
+        const cosignatoryPrivateKey = config.SENSOR1_PRIV_KEY;
+
+        // Replace with the multisig public key
+        const multisigAccountPublicKey = config.MULTISIG_PUB_KEY;
+
+        // Replace with recipient address
+        const recipientAddress = config.BUYER_ADDRESS;
+
+        const multisigAccount = PublicAccount.createFromPublicKey(multisigAccountPublicKey, NetworkType.MIJIN_TEST);
+
+        const cosignatoryAccount = Account.createFromPrivateKey(cosignatoryPrivateKey, NetworkType.MIJIN_TEST);
+        const transferTransaction = TransferTransaction.create(
+            Deadline.create(),
+            Address.createFromRawAddress(recipientAddress),
+            [XEM.createRelative(25)],
+            PlainMessage.create('sending 25 nem:xem'),
+            NetworkType.MIJIN_TEST
+        );
+
+        const aggregateTransaction = AggregateTransaction.createBonded(
+            Deadline.create(),
+            [
+                transferTransaction.toAggregate(multisigAccount),
+            ],
+            NetworkType.MIJIN_TEST
+        );
+
+        //Signing the aggregate transaction
+        const signedTransaction = cosignatoryAccount.sign(aggregateTransaction);
+
+        //Creating the lock funds transaction and announce it
+
+        const lockFundsTransaction = LockFundsTransaction.create(
+            Deadline.create(),
+            XEM.createRelative(10),
+            UInt64.fromUint(480),
+            signedTransaction,
+            NetworkType.MIJIN_TEST);
+
+        const lockFundsTransactionSigned = cosignatoryAccount.sign(lockFundsTransaction);
+
+        const transactionHttp = new TransactionHttp(config.URL);
+
+        // announce signed transaction
+        const listener = new Listener(config.URL);
+
+        listener.open().then(() => {
+
+            transactionHttp.announce(lockFundsTransactionSigned).subscribe(x => console.log(x),
+                err => console.error(err));
+
+            listener.confirmed(cosignatoryAccount.address)
+                .filter((transaction) => transaction.transactionInfo !== undefined
+                    && transaction.transactionInfo.hash === lockFundsTransactionSigned.hash)
+                .flatMap(ignored => transactionHttp.announceAggregateBonded(signedTransaction))
+                .subscribe(announcedAggregateBonded => console.log(announcedAggregateBonded),
+                    err => console.error(err));
+        });
     }
 
     anounce(signedTransaction: any) {
         const transactionHttp = new TransactionHttp(config.URL);
 
         // announce signed transaction
-        
+
         transactionHttp.announce(signedTransaction).subscribe(
             x => console.log(x),
             err => console.error(err));

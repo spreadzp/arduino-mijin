@@ -2,13 +2,13 @@ Get http://localhost:3000/
 
 Get http://localhost:3000/device/3
 
-POST http://localhost:3000/device/signal HTTP/1.1
+POST http://localhost:3001/device/signal HTTP/1.1
 content-type: application/json
 
 {
    "shipmentId": "shrimp-25-05-18",
    "deviceId": "arduino-1",
-   "sensorId": "termo-sensor1",   
+   "sensorId": "sensor1",   
    "value": 45.65,
    "time": "Wed, 23 May 2018 08:32:39 GMT"
 }

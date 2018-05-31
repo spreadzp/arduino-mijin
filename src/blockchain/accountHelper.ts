@@ -123,7 +123,8 @@ export class AccountHelper {
 
     private convertIntoMultisigTransaction(cosignatories: PublicAccount[]) {
         let cosignatoriesMultisigArray: MultisigCosignatoryModification[] = [];
-        for (let i = 0; i < cosignatories.length; i++) {
+        const numberConsignators = cosignatories.length
+        for (let i = 0; i < numberConsignators; i++) {
 
             let newConsignatory = new MultisigCosignatoryModification(
                 MultisigCosignatoryModificationType.Add,
@@ -133,21 +134,21 @@ export class AccountHelper {
         }
         return ModifyMultisigAccountTransaction.create(
             Deadline.create(),
-            1, 1,
+            numberConsignators, 1,
             cosignatoriesMultisigArray,
             NetworkType.MIJIN_TEST
         );
     }
 
     modifyMultisig() {
-        const cosignatoryPrivateKey = config.PRIV_KEY as string;
+        const cosignatoryPrivateKey = config.SENSOR1_PRIV_KEY;
 
         const cosignatoryAccount = Account.createFromPrivateKey(cosignatoryPrivateKey, NetworkType.MIJIN_TEST);
         const multisigAccount = PublicAccount.createFromPublicKey(config.MULTISIG_PUB_KEY, NetworkType.MIJIN_TEST);
 
         const modifyMultisigAccountTransaction = ModifyMultisigAccountTransaction.create(
             Deadline.create(),
-            1,
+            3,
             0,
             [],
             NetworkType.MIJIN_TEST
