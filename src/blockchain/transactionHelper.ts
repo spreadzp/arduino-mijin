@@ -8,18 +8,36 @@ import {
     Listener,
     CosignatureSignedTransaction,
     CosignatureTransaction,
-    AccountHttp
+    AccountHttp,
+    AggregateTransactionCosignature,
+    SignedTransaction,
+    TransactionAnnounceResponse,
+    TransactionType
 } from 'nem2-sdk';
-
+import '/home/dev/Arduino/arduino-mijin/node_modules/rxjs/add/observable/fromPromise';
+import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/map';
+import { Observable } from 'rxjs';
+import { TransactionRoutesApi, ApiClient } from 'nem2-library';
 
 export class TransactionHelper {
     transactionHttp: TransactionHttp;
     privateKey = config.PRIV_KEY as string;
     account: Account;
+    accountHttp: AccountHttp;
+    listener: Listener;
+    transactionRoutesApi: TransactionRoutesApi;
     registerNamespaceTransaction: RegisterNamespaceTransaction;
+    apiClient: ApiClient;
 
     constructor() {
+        this.apiClient = new ApiClient();
+        this.apiClient.basePath = config.URL
+        this.transactionRoutesApi = new TransactionRoutesApi(this.apiClient);
+        this.listener = new Listener(config.URL);
         this.transactionHttp = new TransactionHttp(config.URL);
+        this.accountHttp = new AccountHttp(config.URL);
         this.account = Account.createFromPrivateKey(this.privateKey, NetworkType.MIJIN_TEST);
     }
 
@@ -152,8 +170,54 @@ export class TransactionHelper {
                 err => console.error(err));
     }
 
+    confirmMultisig(cosignerPrivateKey: string) {
+        const consignerAccount = Account.createFromPrivateKey(cosignerPrivateKey, NetworkType.MIJIN_TEST); 
+        const multisigAccount = Account.createFromPrivateKey(config.MULTI_PRIV_KEY, NetworkType.MIJIN_TEST); 
+        //console.log('consignerAccount.publicAccount :', consignerAccount.publicAccount);
+          //console.log('this.accountHttp :', this.accountHttp);
+          this.accountHttp.aggregateBondedTransactions(multisigAccount.publicAccount)
+    .flatMap((_) => _)
+    .filter((_) => !_.signedByAccount(consignerAccount.publicAccount))
+    .map(transaction => this.cosignAggregateBondedTransaction(transaction, consignerAccount ))
+    .flatMap(cosignatureSignedTransaction => this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction))
+    .subscribe(announcedTransaction => console.log(announcedTransaction),
+        err => console.error(err));
+      /* this.listener.open().then(() => {
+
+            this.listener.aggregateBondedAdded(consignerAccount.address)
+                .filter((_) => !_.signedByAccount(consignerAccount.publicAccount))
+                .map(transaction => this.cosignAggregateBondedTransaction(transaction, consignerAccount))
+                .flatMap(cosignatureSignedTransaction => this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction))
+                .subscribe(announcedTransaction => console.log(announcedTransaction),
+                    err => console.error(err));
+        });  */ 
+        /* this.listener.open().then(() => {
+ 
+ 
+         
+        this.accountHttp.getMultisigAccountInfo(consignerAccount.publicAccount)
+            .flatMap((_) => _)
+            .filter((_) => !_.signedByAccount(consignerAccount.publicAccount))
+            .map(transaction => this.cosignAggregateBondedTransaction(transaction, consignerAccount) 
+            )
+            .flatMap(cosignatureSignedTransaction => {
+                return this.transactionHttp.announceAggregateBondedCosignature(cosignatureSignedTransaction)
+            }
+            )
+            .subscribe(announcedTransaction => console.log(announcedTransaction),
+                err => console.error(err));
+            })  
+            */
+      /*   this.accountHttp.getMultisigAccountInfo( consignerAccount.address).subscribe(
+            accountInfo => console.log(accountInfo),
+            err => console.error(err)
+        ); */
+      
+    }
+
     initMultisigTransaction() {
         const cosignatoryPrivateKey = config.SENSOR1_PRIV_KEY;
+        //const cosignatoryPrivateKey = config.SENSOR2_PRIV_KEY;
 
         // Replace with the multisig public key
         const multisigAccountPublicKey = config.MULTISIG_PUB_KEY;
@@ -171,17 +235,21 @@ export class TransactionHelper {
             PlainMessage.create('sending 25 nem:xem'),
             NetworkType.MIJIN_TEST
         );
-
+        const Account2 = PublicAccount.createFromPublicKey(config.SENSOR2_PUB_KEY, NetworkType.MIJIN_TEST);
+        const Account3 = PublicAccount.createFromPublicKey(config.SENSOR3_PUB_KEY, NetworkType.MIJIN_TEST);
         const aggregateTransaction = AggregateTransaction.createBonded(
+            // const aggregateTransaction = AggregateTransaction.createComplete(
             Deadline.create(),
             [
                 transferTransaction.toAggregate(multisigAccount),
             ],
-            NetworkType.MIJIN_TEST
+            NetworkType.MIJIN_TEST,
+            [new AggregateTransactionCosignature('', Account2), new AggregateTransactionCosignature('', Account3)]
         );
 
         //Signing the aggregate transaction
         const signedTransaction = cosignatoryAccount.sign(aggregateTransaction);
+        //this.announceAggregateBonded(signedTransaction);
 
         //Creating the lock funds transaction and announce it
 
@@ -194,24 +262,47 @@ export class TransactionHelper {
 
         const lockFundsTransactionSigned = cosignatoryAccount.sign(lockFundsTransaction);
 
-        const transactionHttp = new TransactionHttp(config.URL);
-
+        //const transactionHttp = new TransactionHttp(config.URL); 
         // announce signed transaction
-        const listener = new Listener(config.URL);
+        //const listener = new Listener(config.URL);
+        //const lockFundsTransactionSigned = cosignatoryAccount.sign(lockFundsTransaction);
+/*         this.accountHttp.getMultisigAccountInfo(cosignatoryAccount.address)
+            .subscribe((data) => console.log('data :', data)) */
 
-        listener.open().then(() => {
+        this.listener.open().then(() => {
 
-            transactionHttp.announce(lockFundsTransactionSigned).subscribe(x => console.log(x),
+            this.transactionHttp.announce(lockFundsTransactionSigned).subscribe(x => console.log(x),
                 err => console.error(err));
 
-            listener.confirmed(cosignatoryAccount.address)
+            this.listener.confirmed(cosignatoryAccount.address)
                 .filter((transaction) => transaction.transactionInfo !== undefined
                     && transaction.transactionInfo.hash === lockFundsTransactionSigned.hash)
-                .flatMap(ignored => transactionHttp.announceAggregateBonded(signedTransaction))
-                .subscribe(announcedAggregateBonded => console.log(announcedAggregateBonded),
+                .flatMap(ignored => {
+                    this.confirmMultisig(config.SENSOR2_PRIV_KEY);
+                    this.confirmMultisig(config.SENSOR3_PRIV_KEY);
+                    return this.transactionHttp.announceAggregateBonded(signedTransaction)
+                }
+                )
+                .subscribe(announcedAggregateBonded => {
+                    console.log(announcedAggregateBonded)
+
+                },
                     err => console.error(err));
-        });
+       });
     }
+
+   /*  public announceAggregateBonded(signedTransaction: SignedTransaction): Observable<TransactionAnnounceResponse> {
+        if (signedTransaction.type !== TransactionType.AGGREGATE_BONDED) {
+            return Observable.fromPromise(new Promise((resolve, reject) => {
+                reject('Only Transaction Type 0x4241 is allowed for announce aggregate bonded');
+            }));
+        }
+        return Observable.fromPromise(this.transactionRoutesApi.announcePartialTransaction(signedTransaction))
+            .map((transactionAnnounceResponseDTO) => {
+                console.log('transactionAnnounceResponseDTO :', transactionAnnounceResponseDTO);
+                return new TransactionAnnounceResponse(transactionAnnounceResponseDTO.message);
+            });
+    } */
 
     anounce(signedTransaction: any) {
         const transactionHttp = new TransactionHttp(config.URL);

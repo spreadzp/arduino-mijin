@@ -24,9 +24,11 @@
     "@nestjs/websockets": "^5.0.0-beta.6",
     "fastify-formbody": "^2.0.0",
     "http-port-forward": "^2.0.3",
+    "nem2-library": "^0.9.3",
     "nem2-sdk": "^0.9.3",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.0.0",
+    "rxjs-compat": "^6.2.0",
     "typescript": "^2.6.2"
   },
   "devDependencies": {

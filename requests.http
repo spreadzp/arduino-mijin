@@ -1,4 +1,4 @@
-Get http://localhost:3000/
+Get http://localhost:3001/
 
 Get http://localhost:3000/device/3
 
@@ -13,8 +13,23 @@ content-type: application/json
    "time": "Wed, 23 May 2018 08:32:39 GMT"
 }
 
+POST http://localhost:3001/device/signal HTTP/1.1
+content-type: application/json
+
+{
+   "shipmentId": "shrimp-25-05-18",
+   "deviceId": "arduino-1",
+   "sensorId": "sensor3",   
+   "value": true,
+   "time": "Wed, 31 May 2018 09:32:39 GMT"
+}
+
+
 Get http://localhost:3000/account
 
 Get http://localhost:3000/address
 
 Get http://localhost:3000/tx
+Get https://arduino-iot-nem.herokuapp.com/tx
+
+Get https://arduino-iot-nem.herokuapp.com/device/3

@@ -1,7 +1,9 @@
+import { config } from './../../blockchain/config';
 import { TransactionHelper } from './../../blockchain/transactionHelper';
 import { Log } from './../models/log';
 import { DeviceData } from './../models/device.data';
 import { Shipment } from '../models/shipment';
+import { Account } from 'nem2-sdk';
 const fileSaver = require('fs');
 
 export class Conveyor {
@@ -13,15 +15,34 @@ export class Conveyor {
     async defineShipment(deviceData: DeviceData) {
 
         //let shipment = Shipment.filter(a => deviceData.shipmentId === a.shipmentId.id);
+        //console.log('Shipment :', Shipment);
+        const sensors = Shipment.find(k => k.shipmentId.id == deviceData.shipmentId).shipmentId.sensorId;
         let shipment = Shipment[0];
-        console.log('shipment :', shipment);
-        this.writeDeviceData(shipment);
-        //const data = shipment.filter(b => b.shipmentId.sensorId.filter(c => c.id === deviceData.sensorId));
-        const data = shipment.shipmentId.sensorId[0].ассоunt;
-        await this.writeToMultisigAccount(data);
-        const oldData = await this.readLog();
-        //console.log('oldData :', oldData);
-        await this.writeLog(`export const Log = ${JSON.stringify(shipment)}`);
+        //console.log('sensors :', sensors);
+        let account;
+        let sensorItem = {};
+        let sensorDone = false;
+        for (const sensor of sensors) {
+            if (sensor.id === deviceData.sensorId && sensor.value === null) {
+                sensor.value = deviceData.value;
+                account = sensor.ассоunt;
+                sensorDone = true;
+                sensorItem = sensor;
+            }
+        }
+
+        if (sensorItem !== {} && sensorDone) {
+            if (sensorItem.initiator) {
+                this.transactionHelper.initMultisigTransaction();
+                const oldData = await this.readLog();
+                await this.writeLog(`export const Log = ${JSON.stringify(shipment)}`);
+                this.writeDeviceData(shipment);
+            } else {
+                const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
+
+                await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
+            }
+        }
     }
 
     writeDeviceData(shipment: any) {
@@ -49,7 +70,8 @@ export class Conveyor {
         });
     }
 
-    writeToMultisigAccount(account: any) {
+    initMultisigTransaction(account: any) {
+        console.log('writeToMultisigAccount :', account);
         this.transactionHelper.initMultisigTransaction();
     }
 }

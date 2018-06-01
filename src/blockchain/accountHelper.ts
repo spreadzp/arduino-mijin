@@ -123,7 +123,7 @@ export class AccountHelper {
 
     private convertIntoMultisigTransaction(cosignatories: PublicAccount[]) {
         let cosignatoriesMultisigArray: MultisigCosignatoryModification[] = [];
-        const numberConsignators = cosignatories.length
+        const numberConsignators = cosignatories.length;
         for (let i = 0; i < numberConsignators; i++) {
 
             let newConsignatory = new MultisigCosignatoryModification(

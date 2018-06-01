@@ -6,18 +6,21 @@ export const Shipment = [
             sensorId: [
                 {
                     id: "sensor1",
+                    initiator: true,
                     value: null,
                     time: null,
                     ассоunt: "dhgkjhsgfkjh"
                 },
                 {
                     id: "sensor2",
+                    initiator: false,
                     value: null,
                     time: null,
                     ассоunt: "df876ewfwef"
                 },
                 {
                     id: "sensor3",
+                    initiator: false,
                     value: null,
                     time: null,
                     ассоunt: "ewu90werwwer678fewf"
