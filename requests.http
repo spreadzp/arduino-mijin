@@ -2,7 +2,7 @@ Get http://localhost:3001/
 
 Get http://localhost:3000/device/3
 
-POST http://localhost:3001/device/signal HTTP/1.1
+POST http://localhost:3000/device/signal HTTP/1.1
 content-type: application/json
 
 {
@@ -13,7 +13,18 @@ content-type: application/json
    "time": "Wed, 23 May 2018 08:32:39 GMT"
 }
 
-POST http://localhost:3001/device/signal HTTP/1.1
+POST http://localhost:3000/device/signal HTTP/1.1
+content-type: application/json
+
+{
+   "shipmentId": "shrimp-25-05-18",
+   "deviceId": "arduino-1",
+   "sensorId": "sensor2",   
+   "value": true,
+   "time": "Wed, 31 May 2018 09:32:39 GMT"
+}
+
+POST http://localhost:3000/device/signal HTTP/1.1
 content-type: application/json
 
 {
@@ -22,6 +33,17 @@ content-type: application/json
    "sensorId": "sensor3",   
    "value": true,
    "time": "Wed, 31 May 2018 09:32:39 GMT"
+}
+
+POST http://localhost:3000/buyer/prepay HTTP/1.1
+content-type: application/json
+
+{
+    "buerCurrency": "XEM",
+    "payment": "33",
+    "itemName": "XEM",
+    "quantityOfGoods": "1",
+    "time": "Wed, 31 May 2018 09:32:39 GMT"
 }
 
 

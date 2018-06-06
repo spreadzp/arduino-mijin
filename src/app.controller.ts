@@ -1,3 +1,4 @@
+import { BuyerData } from './common/models/buyer.data'; 
 import { TransactionHelper } from './blockchain/transactionHelper';
 import { SensorAccount } from './common/mijin/sensorAccount';
 import { Conveyor } from './common/helpers/conveyor';
@@ -78,6 +79,12 @@ export class AppController {
   setNewSignal(@Body() newSignal: DeviceData, @Res() res) {
     this.conveyor.defineShipment(newSignal);
     res.status(HttpStatus.OK).json(newSignal);
+  }
+
+  @Post('buyer/prepay')
+  buyerPrepay(@Body() buyerData: BuyerData, @Res() res) {
+    this.conveyor.prepayOfBuyer(buyerData);
+    res.status(HttpStatus.OK).json(buyerData);
   }
 
   @Get('**')

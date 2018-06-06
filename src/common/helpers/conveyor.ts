@@ -1,3 +1,4 @@
+import { BuyerData } from './../models/buyer.data';
 import { config } from './../../blockchain/config';
 import { TransactionHelper } from './../../blockchain/transactionHelper';
 import { Log } from './../models/log';
@@ -30,10 +31,15 @@ export class Conveyor {
                 sensorItem = sensor;
             }
         }
+        const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
 
+        await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
         if (sensorItem !== {} && sensorDone) {
             if (sensorItem.initiator) {
-                this.transactionHelper.initMultisigTransaction();
+                //this.transactionHelper.initMultisigTransaction();
+                const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
+
+                await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
                 const oldData = await this.readLog();
                 await this.writeLog(`export const Log = ${JSON.stringify(shipment)}`);
                 this.writeDeviceData(shipment);
@@ -41,8 +47,8 @@ export class Conveyor {
                 const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
 
                 await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
-            }
-        }
+            } 
+         }
     }
 
     writeDeviceData(shipment: any) {
@@ -73,5 +79,9 @@ export class Conveyor {
     initMultisigTransaction(account: any) {
         console.log('writeToMultisigAccount :', account);
         this.transactionHelper.initMultisigTransaction();
+    }
+
+    prepayOfBuyer(buyerData: BuyerData) {
+        this.transactionHelper.prepayBuyer()
     }
 }
