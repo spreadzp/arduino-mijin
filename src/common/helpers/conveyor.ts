@@ -1,3 +1,4 @@
+import { Sensor } from './../models/sensor';
 import { BuyerData } from './../models/buyer.data';
 import { config } from './../../blockchain/config';
 import { TransactionHelper } from './../../blockchain/transactionHelper';
@@ -14,15 +15,12 @@ export class Conveyor {
         this.transactionHelper = new TransactionHelper();
     }
     async defineShipment(deviceData: DeviceData) {
-
-        //let shipment = Shipment.filter(a => deviceData.shipmentId === a.shipmentId.id);
-        //console.log('Shipment :', Shipment);
         const sensors = Shipment.find(k => k.shipmentId.id == deviceData.shipmentId).shipmentId.sensorId;
         let shipment = Shipment[0];
-        //console.log('sensors :', sensors);
         let account;
-        let sensorItem = {};
+        let sensorItem: Sensor;
         let sensorDone = false;
+
         for (const sensor of sensors) {
             if (sensor.id === deviceData.sensorId && sensor.value === null) {
                 sensor.value = deviceData.value;
@@ -31,24 +29,13 @@ export class Conveyor {
                 sensorItem = sensor;
             }
         }
-        const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
-
-        await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
-        if (sensorItem !== {} && sensorDone) {
-            if (sensorItem.initiator) {
-                //this.transactionHelper.initMultisigTransaction();
-                const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
-
-                await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
-                const oldData = await this.readLog();
-                await this.writeLog(`export const Log = ${JSON.stringify(shipment)}`);
-                this.writeDeviceData(shipment);
-            } else {
-                const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
-
-                await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName])
-            } 
-         }
+        if(sensorItem !== undefined) {
+            const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
+            await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]); 
+        } else {
+            console.log('Bad request or this sensor already have consigned');
+        }
+       
     }
 
     writeDeviceData(shipment: any) {
@@ -56,6 +43,7 @@ export class Conveyor {
         console.log('Log :');
     }
 
+    //method for DB
     async readLog() {
         this.fs.readFile(__dirname + '/../models/log.ts', function (err, data) {
             if (err) {
@@ -64,9 +52,9 @@ export class Conveyor {
             console.log("Asynchronous read: " + data.toString());
             return data
         })
-
     }
 
+    //method for DB
     async writeLog(newSensorData: any) {
         this.fs.writeFile(__dirname + '/../models/log.ts', newSensorData, function (err) {
             if (err) {
