@@ -51,7 +51,7 @@ content-type: application/json
 
 {
     "buerCurrency": "XEM",
-    "payment": "33",
+    "payment": "3",
     "itemName": "XEM",
     "quantityOfGoods": "1",
     "time": "Wed, 31 May 2018 09:32:39 GMT"
