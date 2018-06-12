@@ -35,7 +35,7 @@ content-type: application/json
    "time": "Wed, 31 May 2018 09:32:39 GMT"
 }
 
-POST https://arduino-mijin-twdcwucovd.now.sh/device/signal  HTTP/1.1
+POST https://arduino-mijin-qcpbglakaw.now.sh/device/signal  HTTP/1.1
 content-type: application/json
 
 {

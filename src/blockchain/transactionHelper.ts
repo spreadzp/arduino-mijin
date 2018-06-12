@@ -148,8 +148,8 @@ export class TransactionHelper {
         const buyerToSellerTx = TransferTransaction.create(
             Deadline.create(),
             sellerMultisigAccount.address,
-            [XEM.createRelative(33)],
-            PlainMessage.create('send 33 nem:xem to seller'),
+            [XEM.createRelative(3)],
+            PlainMessage.create('send 3 nem:xem to seller'),
             NetworkType.MIJIN_TEST,
         );
         const message = `send ${1}${'482-solutions:arduino-testtoken'} to buyer`;

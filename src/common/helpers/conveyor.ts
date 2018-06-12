@@ -22,14 +22,14 @@ export class Conveyor {
         let sensorDone = false;
         console.log('deviceData.sensorId :', deviceData.sensorId);
         for (const sensor of sensors) {
-            if (sensor.id === deviceData.sensorId && sensor.value === null) {
+            if (sensor.id == deviceData.sensorId) {
                 sensor.value = deviceData.value;
                 account = sensor.ассоunt;
                 sensorDone = true;
                 sensorItem = sensor;
             }
         } 
-        
+
         if (sensorItem !== undefined) {
             console.log(`${sensorItem.id} consigning...`);
             const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
