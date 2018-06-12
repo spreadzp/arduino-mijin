@@ -27,15 +27,22 @@ export class Conveyor {
                 account = sensor.ассоunt;
                 sensorDone = true;
                 sensorItem = sensor;
+                const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
+                await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]); 
+                console.log(`${deviceData.sensorId} consigning...`);
             }
         }
-        if(sensorItem !== undefined) {
+       /*  if(sensorItem !== undefined) {
             const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
             await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]); 
         } else {
             console.log('Bad request or this sensor already have consigned');
-        }
+        } */
        
+    }
+
+    confirmMultisig() {
+
     }
 
     writeDeviceData(shipment: any) {

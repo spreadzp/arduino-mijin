@@ -35,6 +35,17 @@ content-type: application/json
    "time": "Wed, 31 May 2018 09:32:39 GMT"
 }
 
+POST https://arduino-mijin-deaizwongu.now.sh/device/signal  HTTP/1.1
+content-type: application/json
+
+{
+   "shipmentId": "shrimp-25-05-18",
+   "deviceId": "arduino-1",
+   "sensorId": "sensor3",   
+   "value": true,
+   "time": "Wed, 31 May 2018 09:32:39 GMT"
+}
+
 POST http://localhost:3000/buyer/prepay HTTP/1.1
 content-type: application/json
 
