@@ -14,7 +14,6 @@ import {
     TransactionAnnounceResponse,
     TransactionType
 } from 'nem2-sdk';
-import '/home/dev/Arduino/arduino-mijin/node_modules/rxjs/add/observable/fromPromise';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
