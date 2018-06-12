@@ -20,25 +20,23 @@ export class Conveyor {
         let account;
         let sensorItem: Sensor;
         let sensorDone = false;
-
+        console.log('deviceData.sensorId :', deviceData.sensorId);
         for (const sensor of sensors) {
             if (sensor.id === deviceData.sensorId && sensor.value === null) {
                 sensor.value = deviceData.value;
                 account = sensor.ассоunt;
                 sensorDone = true;
                 sensorItem = sensor;
-                const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
-                await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]); 
-                console.log(`${deviceData.sensorId} consigning...`);
             }
         }
-       /*  if(sensorItem !== undefined) {
+        console.log(`${sensorItem.id} consigning...`);
+        if (sensorItem !== undefined) {
             const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
-            await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]); 
+            await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]);
         } else {
             console.log('Bad request or this sensor already have consigned');
-        } */
-       
+        }
+
     }
 
     confirmMultisig() {
