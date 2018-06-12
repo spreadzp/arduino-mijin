@@ -28,9 +28,10 @@ export class Conveyor {
                 sensorDone = true;
                 sensorItem = sensor;
             }
-        }
-        console.log(`${sensorItem.id} consigning...`);
+        } 
+        
         if (sensorItem !== undefined) {
+            console.log(`${sensorItem.id} consigning...`);
             const consignerPrivateKeyName = sensorItem.id.toString().toUpperCase() + '_PRIV_KEY';
             await this.transactionHelper.confirmMultisig(config[consignerPrivateKeyName]);
         } else {
